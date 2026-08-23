@@ -30,7 +30,6 @@ if __name__ == '__main__':
     parser.add_argument('--target_fps', type=int, default=-1, help='target fps of the input video, -1 means the original fps')
     parser.add_argument('--metric', action='store_true', help='use metric model')
     parser.add_argument('--fp32', action='store_true', help='model infer with torch.float32, default is torch.float16')
-    parser.add_argument('--grayscale', action='store_true', help='do not apply colorful palette')
     parser.add_argument('--save_npz', action='store_true', help='save depths as npz')
     parser.add_argument('--save_exr', action='store_true', help='save depths as exr')
     parser.add_argument('--focal-length-x', default=470.4, type=float,
@@ -62,7 +61,7 @@ if __name__ == '__main__':
     processed_video_path = os.path.join(args.output_dir, os.path.splitext(video_name)[0]+'_src.mp4')
     depth_vis_path = os.path.join(args.output_dir, os.path.splitext(video_name)[0]+'_vis.mp4')
     save_video(frames, processed_video_path, fps=fps)
-    save_video(depths, depth_vis_path, fps=fps, is_depths=True, grayscale=args.grayscale)
+    save_video(depths, depth_vis_path, fps=fps, is_depths=True)
 
     if args.save_npz:
         depth_npz_path = os.path.join(args.output_dir, os.path.splitext(video_name)[0]+'_depths.npz')
@@ -81,21 +80,3 @@ if __name__ == '__main__':
             exr_file = OpenEXR.OutputFile(output_exr, header)
             exr_file.writePixels({"Z": depth.tobytes()})
             exr_file.close()
-
-    if args.metric:
-        import open3d as o3d
-
-        width, height = depths[0].shape[-1], depths[0].shape[-2]
-        x, y = np.meshgrid(np.arange(width), np.arange(height))
-        x = (x - width / 2) / args.focal_length_x
-        y = (y - height / 2) / args.focal_length_y
-
-        for i, (color_image, depth) in enumerate(zip(frames, depths)):
-            z = np.array(depth)
-            points = np.stack((np.multiply(x, z), np.multiply(y, z), z), axis=-1).reshape(-1, 3)
-            colors = np.array(color_image).reshape(-1, 3) / 255.0
-
-            pcd = o3d.geometry.PointCloud()
-            pcd.points = o3d.utility.Vector3dVector(points)
-            pcd.colors = o3d.utility.Vector3dVector(colors)
-            o3d.io.write_point_cloud(os.path.join(args.output_dir, 'point' + str(i).zfill(4) + '.ply'), pcd)
