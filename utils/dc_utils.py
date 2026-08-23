@@ -4,8 +4,8 @@
 # This file may have been modified by ByteDance Ltd. and/or its affiliates on [date of modification]
 # Original file is released under [ MIT License license], with the full license text available at [https://github.com/Tencent/DepthCrafter?tab=License-1-ov-file].
 import numpy as np
-import matplotlib.cm as cm
-import imageio
+from PIL import Image
+
 try:
     from decord import VideoReader, cpu
     DECORD_AVAILABLE = True
@@ -70,14 +70,13 @@ def read_video_frames(video_path, process_length, target_fps=-1, max_res=-1):
 
 
 def save_video(frames, output_video_path, fps=10, is_depths=False):
-    writer = imageio.get_writer(output_video_path, fps=fps, macro_block_size=1, codec='libx264', ffmpeg_params=['-crf', '18'])
     if is_depths:
         for i in range(frames.shape[0]):
             depth = frames[i]
             depth_inv = ((depth - depth.max()) * (-1)).astype(np.uint16)
-            writer.append_data(depth_inv)
+            im = Image.fromarray(depth_inv)
+            im.save(output_video_path + f"/depth/frame_{i:04d}.png")
     else:
         for i in range(frames.shape[0]):
-            writer.append_data(frames[i])
-
-    writer.close()
+            im = Image.fromarray(frames[i].astype(np.uint16))
+            im.save(output_video_path + f"/rgb/frame_{i:04d}.png")
