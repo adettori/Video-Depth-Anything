@@ -78,5 +78,5 @@ def save_video(frames, output_video_path, fps=10, is_depths=False):
             im.save(output_video_path + f"/depth/frame_{i:04d}.png")
     else:
         for i in range(frames.shape[0]):
-            im = Image.fromarray(frames[i].detach().cpu().numpy().astype(np.uint16))
+            im = Image.fromarray(frames[i].detach().cpu().numpy())
             im.save(output_video_path + f"/rgb/frame_{i:04d}.png")
