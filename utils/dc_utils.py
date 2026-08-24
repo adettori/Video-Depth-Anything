@@ -4,7 +4,6 @@
 # This file may have been modified by ByteDance Ltd. and/or its affiliates on [date of modification]
 # Original file is released under [ MIT License license], with the full license text available at [https://github.com/Tencent/DepthCrafter?tab=License-1-ov-file].
 import numpy as np
-from PIL import Image
 
 try:
     from decord import VideoReader, cpu
@@ -73,10 +72,8 @@ def save_video(frames, output_video_path, fps=10, is_depths=False):
     if is_depths:
         for i in range(frames.shape[0]):
             depth = frames[i]
-            depth_inv = ((depth - depth.max()) * (-1))
-            im = Image.fromarray(depth_inv.detach().cpu().numpy().astype(np.uint16))
-            im.save(output_video_path + f"/depth/frame_{i:04d}.png")
+            depth_inv = ((depth - depth.max()) * (-1)).astype(np.uint16)
+            cv2.imwrite(output_video_path + f"/depth/frame_{i:04d}.png", depth_inv)
     else:
         for i in range(frames.shape[0]):
-            im = Image.fromarray(frames[i].detach().cpu().numpy())
-            im.save(output_video_path + f"/rgb/frame_{i:04d}.png")
+            cv2.imwrite(output_video_path + f"/depth/frame_{i:04d}.png", frames[i])
