@@ -4,12 +4,12 @@
 # This file may have been modified by ByteDance Ltd. and/or its affiliates on [date of modification]
 # Original file is released under [ MIT License license], with the full license text available at [https://github.com/Tencent/DepthCrafter?tab=License-1-ov-file].
 import numpy as np
+import cv2
 
 try:
     from decord import VideoReader, cpu
     DECORD_AVAILABLE = True
 except:
-    import cv2
     DECORD_AVAILABLE = False
 
 def ensure_even(value):
