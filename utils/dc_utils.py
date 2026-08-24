@@ -71,9 +71,10 @@ def read_video_frames(video_path, process_length, target_fps=-1, max_res=-1):
 def save_video(frames, output_video_path, fps=10, is_depths=False):
     if is_depths:
         for i in range(frames.shape[0]):
-            depth = frames[i]
+            depth = frames[i] * 1000
             depth_inv = ((depth - depth.max()) * (-1)).astype(np.uint16)
             cv2.imwrite(output_video_path + f"/depth/frame_{i:04d}.png", depth_inv)
     else:
         for i in range(frames.shape[0]):
-            cv2.imwrite(output_video_path + f"/depth/frame_{i:04d}.png", frames[i])
+            frame = cv2.cvtColor(frames[i], cv2.COLOR_BGR2RGB)  # Convert RGB to BGR
+            cv2.imwrite(output_video_path + f"/rgb/frame_{i:04d}.png", frame)
